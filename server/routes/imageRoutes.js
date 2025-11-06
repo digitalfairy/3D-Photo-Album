@@ -12,27 +12,13 @@ const router = express.Router();
  */
 const imageRoutes = (requireAuth) => {
     
-    const bypassAuth = (req, res, next) => {
-        req.auth = { userId: "user_dev_bypass_01" };
-        return next();
-    };
-
     router.post('/upload', 
-
-        (req, res, next) => {
-            return next();
-        },
 
         upload.single('image'),
 
-        (req, res, next) => {
-            return next();
-        },
-
-        bypassAuth, 
+        requireAuth, 
         
         async (req, res) => {
-            
             const userId = req.auth?.userId; 
             let filePath = req.file?.path; 
 
@@ -84,7 +70,7 @@ const imageRoutes = (requireAuth) => {
         }
     ); 
     
-    router.get('/me', bypassAuth, async (req, res) => { 
+    router.get('/me', requireAuth, async (req, res) => { 
         const userId = req.auth.userId; 
         
         try {

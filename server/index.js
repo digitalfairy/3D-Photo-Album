@@ -18,7 +18,7 @@ const requireAuthMiddleware = createClerkExpressRequireAuth({
 });
 
 const corsOptions = {
-    origin: 'http://localhost:5173', 
+    origin: 'https://photo-gallery-frontend-steel.vercel.app', 
     credentials: true,
     methods: ['GET', 'POST', 'OPTIONS', 'DELETE'], 
     allowedHeaders: ['Content-Type', 'Authorization'], 

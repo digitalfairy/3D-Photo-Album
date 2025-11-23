@@ -15,8 +15,8 @@ const router = express.Router();
 const imageRoutes = (requireAuth) => {
     
     router.post('/upload', 
-        upload.single('image'), // Multer middleware now places the file in req.file.buffer
         requireAuth, 
+        upload.single('image'), 
         
         async (req, res) => {
             const userId = req.auth?.userId; 

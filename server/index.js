@@ -11,23 +11,36 @@ const app = express();
 const port = process.env.PORT || 3001;
 const mongoUri = process.env.MONGODB_URI;
 
+const allowedOrigins = [
+  'https://app.anitacreativestudio.com',           
+  'https://photo-gallery-frontend-steel.vercel.app', 
+  'http://localhost:3000'
+];
+
+const corsOptions = {
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'OPTIONS', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
+app.use(cors(corsOptions)); 
+
+app.use(express.json()); 
+
 const requireAuthMiddleware = createClerkExpressRequireAuth({
     secretKey: process.env.CLERK_SECRET_KEY,
     jwksUrl: process.env.CLERK_JWKS_URL, 
     jwtKey: 'long-lasting', 
 });
 
-const corsOptions = {
-    origin: 'https://photo-gallery-frontend-steel.vercel.app', 
-    credentials: true,
-    methods: ['GET', 'POST', 'OPTIONS', 'DELETE'], 
-    allowedHeaders: ['Content-Type', 'Authorization'], 
-};
-app.use(cors(corsOptions)); 
-
 app.use('/api/images', imageRoutes(requireAuthMiddleware)); 
-
-app.use(express.json()); 
 
 const connectDB = async () => { 
     try {

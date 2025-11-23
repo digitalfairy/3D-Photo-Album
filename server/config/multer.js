@@ -1,16 +1,13 @@
+// server/config/multer.js
+
 import multer from 'multer';
-import os from 'os';
 
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-    cb(null, os.tmpdir()); 
-    },
+// Switch from diskStorage to memoryStorage
+// This stores the file buffer directly in RAM, avoiding file system I/O, 
+// which is required for ephemeral environments like Render.
+const storage = multer.memoryStorage();
 
-    filename: function (req, file, cb) {
-        cb(null, `${Date.now()}-${file.originalname}`);
-    }
-});
-
+// Multer initialization remains the same
 const upload = multer({ storage: storage });
 
 export default upload;

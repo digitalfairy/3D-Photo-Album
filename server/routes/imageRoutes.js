@@ -1,8 +1,10 @@
+// server/routes/imageRoutes.js
+
 import express from 'express';
-import upload from '../config/multer.js'; 
+import upload from '../config/multer.js'; // NOTE: This must now use memoryStorage
 import { uploadImage } from '../config/cloudinary.js';
 import UserImage from '../models/Image.js';
-import fs from 'fs/promises'; 
+// import fs from 'fs/promises'; // REMOVED: No longer needed with memory storage
 
 const router = express.Router();
 
@@ -13,15 +15,12 @@ const router = express.Router();
 const imageRoutes = (requireAuth) => {
     
     router.post('/upload', 
-
-        upload.single('image'),
-
+        upload.single('image'), // Multer middleware now places the file in req.file.buffer
         requireAuth, 
         
         async (req, res) => {
             const userId = req.auth?.userId; 
-            let filePath = req.file?.path; 
-
+            
             try {
                 if (!userId) {
                     return res.status(401).json({ error: 'Authentication token missing or invalid.' });
@@ -30,13 +29,16 @@ const imageRoutes = (requireAuth) => {
                     return res.status(400).json({ error: 'No file was uploaded. Check formData field name ("image").' });
                 }
 
+                // 1. Convert file buffer to a Data URI for direct upload to Cloudinary
+                const b64 = Buffer.from(req.file.buffer).toString("base64");
+                const dataURI = `data:${req.file.mimetype};base64,${b64}`;
+
                 const uploadResult = await uploadImage(
-                    filePath, 
+                    dataURI, // Pass the Data URI to Cloudinary
                     userId 
                 );
                 
-                await fs.unlink(filePath); 
-                filePath = null; 
+                // 2. Removed file system cleanup (fs.unlink) - not needed with memory storage
 
                 const newImage = new UserImage({
                     url: uploadResult.secure_url,
@@ -56,11 +58,7 @@ const imageRoutes = (requireAuth) => {
             } catch (error) {
                 console.error("Upload process failed:", error);
                 
-                if (filePath) { 
-                    try { await fs.unlink(filePath); } catch (cleanupError) { 
-                        console.error("Temporary file cleanup failed:", cleanupError.message); 
-                    }
-                }
+                // 3. Removed file cleanup error handling - not needed with memory storage
                 
                 return res.status(error.status || 500).json({ 
                     error: 'Server error during upload or save.', 
@@ -70,6 +68,7 @@ const imageRoutes = (requireAuth) => {
         }
     ); 
     
+    // Existing route to fetch user images
     router.get('/me', requireAuth, async (req, res) => { 
         const userId = req.auth.userId; 
         

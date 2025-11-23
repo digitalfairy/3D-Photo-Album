@@ -35,8 +35,6 @@ app.use(cors(corsOptions));
 app.use(express.json()); 
 
 const requireAuthMiddleware = createClerkExpressRequireAuth({
-    secretKey: process.env.CLERK_SECRET_KEY,
-    jwksUrl: process.env.CLERK_JWKS_URL, 
     jwtKey: 'long-lasting', 
 });
 

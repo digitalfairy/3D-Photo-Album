@@ -9,7 +9,7 @@ import { dark } from '@clerk/themes';
 import { useUserPages } from "../hooks/useUserPages"; 
 import { useEffect, useState, useRef } from "react"; 
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3001"; // Fallback for local testing
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 const API_UPLOAD_URL = `${API_BASE_URL}/api/images/upload`;
 
 export const AuthAndUpload = () => {

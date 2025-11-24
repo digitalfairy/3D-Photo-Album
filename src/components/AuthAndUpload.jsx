@@ -9,10 +9,15 @@ import { dark } from '@clerk/themes';
 import { useUserPages } from "../hooks/useUserPages"; 
 import { useEffect, useState, useRef } from "react"; 
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
-const API_UPLOAD_URL = `${API_BASE_URL}/api/images/upload`;
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-//const FORCED_BUILD_TRIGGER = 'v1'
+if (!API_BASE_URL) {
+    console.error("FATAL: NEXT_PUBLIC_API_URL is missing. Check Vercel config.");
+    // We can return a placeholder or throw an error to visibly halt execution
+    // for this component if the API base is not set.
+}
+
+const API_UPLOAD_URL = `${API_BASE_URL}/api/images/upload`;
 
 export const AuthAndUpload = () => {
     const { 

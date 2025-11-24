@@ -9,7 +9,7 @@ import { dark } from '@clerk/themes';
 import { useUserPages } from "../hooks/useUserPages"; 
 import { useEffect, useState, useRef } from "react"; 
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_BASE_URL = process.env.VITE_PUBLIC_API_URL;
 
 if (!API_BASE_URL) {
     console.error("FATAL: NEXT_PUBLIC_API_URL is missing. Check Vercel config.");

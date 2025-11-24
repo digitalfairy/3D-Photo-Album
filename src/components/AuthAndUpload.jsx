@@ -12,6 +12,8 @@ import { useEffect, useState, useRef } from "react";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 const API_UPLOAD_URL = `${API_BASE_URL}/api/images/upload`;
 
+//const FORCED_BUILD_TRIGGER = 'v1'
+
 export const AuthAndUpload = () => {
     const { 
         isLoaded: authLoaded, 

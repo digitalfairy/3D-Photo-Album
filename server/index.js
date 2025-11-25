@@ -35,17 +35,6 @@ app.use(cors(corsOptions));
 
 app.use(express.json()); 
 
-// 2. CRITICAL FIX: Custom middleware to bypass Clerk authentication for OPTIONS preflights.
-// This must run *before* the Clerk middleware is applied to the routes.
-app.use('/api/images', (req, res, next) => {
-    // If it's the OPTIONS method, return 200 immediately.
-    // The CORS headers were already set by app.use(cors(corsOptions)) above.
-    if (req.method === 'OPTIONS') {
-        return res.sendStatus(200); 
-    }
-    next();
-});
-
 // 3. Initialize Clerk authentication middleware
 const requireAuthMiddleware = createClerkExpressRequireAuth({
     jwtKey: 'long-lasting', 

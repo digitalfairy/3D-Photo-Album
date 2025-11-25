@@ -3,9 +3,8 @@ import { dynamicPagesAtom, defaultPages } from "../stores/pageStore";
 import { useAuth } from "@clerk/clerk-react";
 import { useCallback, useState, useMemo } from "react"; 
 
-// 🎯 FIX: Replaced hardcoded localhost URL with the environment variable
-const API_ROOT_URL = process.env.VITE_PUBLIC_API_URL || "";
-const API_BASE_URL = `${API_ROOT_URL}/api/images`; 
+const API_ROOT_URL = "https://photo-gallery-api-l2fz.onrender.com"; 
+const API_BASE_URL = `${API_ROOT_URL}/api/images`;
 
 export const MAX_IMAGE_SLOTS = 16; 
 const TOTAL_PAGES = 10; 

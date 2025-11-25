@@ -9,15 +9,8 @@ import { dark } from '@clerk/themes';
 import { useUserPages } from "../hooks/useUserPages"; 
 import { useEffect, useState, useRef } from "react"; 
 
-const API_BASE_URL = process.env.VITE_PUBLIC_API_URL || ""; 
-// Use an empty string as a safe fallback.
-
-if (!API_BASE_URL) {
-    console.error("FATAL: VITE_PUBLIC_API_URL is missing. Check Vercel config.");
-}
-
-// Ensure the URL is constructed safely.
-const API_UPLOAD_URL = `${API_BASE_URL}/api/images/upload`;
+const API_ROOT_URL = "https://photo-gallery-api-l2fz.onrender.com"; 
+const API_UPLOAD_URL = `${API_ROOT_URL}/api/images/upload`;
 
 export const AuthAndUpload = () => {
     const { 

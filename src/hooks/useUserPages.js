@@ -1,6 +1,5 @@
 import { useAtom } from "jotai";
 import { dynamicPagesAtom, defaultPages } from "../stores/pageStore";
-// 1. UPDATE IMPORT: Replace useAuth with useAuth0
 import { useAuth0 } from "@auth0/auth0-react"; 
 import { useCallback, useState, useMemo } from "react"; 
 
@@ -18,53 +17,45 @@ const BACK_COVER_PATH = "/textures/book-back.jpg";
  */
 
 export const useUserPages = () => {
-    // 2. UPDATE HOOK: Replace useAuth() with useAuth0()
     const { 
         isLoading, 
         isAuthenticated,
         user,
-        getAccessTokenSilently // Replaces getToken
+        getAccessTokenSilently
     } = useAuth0(); 
     
-    // Map Auth0 properties to original logic variables
     const isLoaded = !isLoading;
-    // Auth0 uses user.sub as the unique user ID (Clerk's userId)
     const userId = user ? user.sub : null; 
     
     const [pages, setPages] = useAtom(dynamicPagesAtom);
 
     const [userImageUrls, setUserImageUrls] = useState([]);
 
-    // We don't need 'mockUserId' anymore since 'userId' is available from useAuth0
     const fetchUserPages = useCallback(async (explicitUserId) => { 
         
-        const effectiveUserId = explicitUserId || userId; // Keep for fetching public vs user pages
+        const effectiveUserId = explicitUserId || userId;
         
-        // 3. UPDATE CONDITION: Check Auth0's isAuthenticated property 
         if (!isLoaded || (!isAuthenticated && !explicitUserId)) { 
-             // If not loaded OR (not signed in AND not explicitly fetching public pages)
             setPages(defaultPages);
             setUserImageUrls([]);
             return;
         }
         
-        // Only attempt to get token if we have a user and are trying to access user pages
         const isProtectedFetch = effectiveUserId && isAuthenticated;
         let token = null;
 
         try {
             if (isProtectedFetch) {
-                // 4. FIX: Use getAccessTokenSilently() and explicitly request the Audience
-                // This ensures the token contains the necessary claim for the backend to validate.
+                // *** FIX APPLIED HERE: Added 'write:photos' to the scope string. ***
                 token = await getAccessTokenSilently({
                     authorizationParams: {
-                        audience: "https://photogalleryapi.com", // Must match your Auth0 API Identifier
-                        scope: 'openid profile email read:photos',
+                        audience: "https://photogalleryapi.com",
+                        // The token must request ALL required scopes for both read and write operations.
+                        scope: 'openid profile email read:photos write:photos', 
                     },
                 }); 
             }
             
-            // Determine the API endpoint: /me (protected) or /public 
             const apiEndpoint = isProtectedFetch ? `${API_BASE_URL}/me` : `${API_BASE_URL}/public`;
             
             const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
@@ -74,6 +65,7 @@ export const useUserPages = () => {
             });
 
             if (!response.ok) {
+                // If the backend returns a 403 Forbidden, this error will be thrown.
                 throw new Error("Failed to fetch images.");
             }
 

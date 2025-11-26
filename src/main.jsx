@@ -15,7 +15,6 @@ const callbackUrl = import.meta.env.VITE_AUTH0_CALLBACK_URL;
 
 // CRITICAL: This is the identifier for the API you created in your Auth0 dashboard 
 // (the one that represents your Render backend).
-// You must replace the placeholder below with your actual Auth0 API Identifier string.
 const auth0Audience = "https://photogalleryapi.com"; 
 
 // Basic check for required keys
@@ -25,17 +24,20 @@ if (!domain || !clientId || !callbackUrl) {
 // --- End Configuration Retrieval ---
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    {/* 3. New Provider: Replace ClerkProvider with Auth0Provider */}
-    <Auth0Provider
-      domain={domain}
-      clientId={clientId}
-      authorizationParams={{
-        redirect_uri: callbackUrl,
-        audience: auth0Audience, // Pass the Audience here
-      }}
-    >
-      <App />
-    </Auth0Provider>
-  </React.StrictMode>,
+    <React.StrictMode>
+        {/* 3. New Provider: Replace ClerkProvider with Auth0Provider */}
+        <Auth0Provider
+            domain={domain}
+            clientId={clientId}
+            authorizationParams={{
+                redirect_uri: callbackUrl,
+                audience: auth0Audience, 
+                // *** FIX: ADD SCOPE HERE ***
+                scope: 'openid profile email', // Standard scopes for user info
+                // --------------------------
+            }}
+        >
+            <App />
+        </Auth0Provider>
+    </React.StrictMode>,
 );

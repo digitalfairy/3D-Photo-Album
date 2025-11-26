@@ -54,14 +54,16 @@ export const useUserPages = () => {
 
         try {
             if (isProtectedFetch) {
-                // 4. UPDATE TOKEN RETRIEVAL: Use getAccessTokenSilently()
-                // The 'template' property is not needed for Auth0's standard flow
-                token = await getAccessTokenSilently(); 
+                // 4. FIX: Use getAccessTokenSilently() and explicitly request the Audience
+                // This ensures the token contains the necessary claim for the backend to validate.
+                token = await getAccessTokenSilently({
+                    authorizationParams: {
+                        audience: "https://photogalleryapi.com", // Must match your Auth0 API Identifier
+                    },
+                }); 
             }
             
             // Determine the API endpoint: /me (protected) or /public 
-            // NOTE: Assuming /public route is available for non-authenticated users
-            // If fetching public pages (no token needed), fetch should go to a public route
             const apiEndpoint = isProtectedFetch ? `${API_BASE_URL}/me` : `${API_BASE_URL}/public`;
             
             const headers = token ? { 'Authorization': `Bearer ${token}` } : {};

@@ -19,7 +19,8 @@ const imageRoutes = (requireAuth) => {
         upload.single('image'), 
         
         async (req, res) => {
-            const userId = req.auth?.userId; 
+            // FIX: Use req.auth.sub (standard JWT claim for Subject/User ID)
+            const userId = req.auth?.sub; 
             
             try {
                 if (!userId) {
@@ -70,7 +71,8 @@ const imageRoutes = (requireAuth) => {
     
     // Existing route to fetch user images
     router.get('/me', requireAuth, async (req, res) => { 
-        const userId = req.auth.userId; 
+        // FIX: Use req.auth.sub (standard JWT claim for Subject/User ID)
+        const userId = req.auth.sub; 
         
         try {
             const userImages = await UserImage.find({ userId }).sort({ createdAt: 1 }).exec();

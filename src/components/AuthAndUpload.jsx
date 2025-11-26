@@ -1,11 +1,5 @@
-import { 
-    SignInButton, 
-    SignedIn, 
-    SignedOut, 
-    useAuth, 
-    UserButton 
-} from "@clerk/clerk-react";
-import { dark } from '@clerk/themes'; 
+// src/components/AuthAndUpload.jsx
+import { useAuth0 } from "@auth0/auth0-react"; // 1. NEW IMPORT
 import { useUserPages } from "../hooks/useUserPages"; 
 import { useEffect, useState, useRef } from "react"; 
 
@@ -13,14 +7,21 @@ const API_ROOT_URL = "https://photo-gallery-api-l2fz.onrender.com";
 const API_UPLOAD_URL = `${API_ROOT_URL}/api/images/upload`;
 
 export const AuthAndUpload = () => {
+    // 2. REPLACE useAuth() with useAuth0()
     const { 
-        isLoaded: authLoaded, 
-        isSignedIn, 
-        getToken, 
-        userId 
-    } = useAuth();
+        isAuthenticated,       // Replaces isSignedIn
+        isLoading,             // Replaces authLoaded state
+        user,                  // Contains user info
+        loginWithRedirect,     // Replaces SignInButton action
+        logout,                // Replaces UserButton logout action
+        getAccessTokenSilently // Replaces getToken
+    } = useAuth0();
     
-
+    // Auth0 uses user.sub as the unique user ID (Clerk's userId)
+    const authLoaded = !isLoading;
+    const isSignedIn = isAuthenticated;
+    const userId = user ? user.sub : null; 
+    
     const { fetchUserPages, currentImageCount, MAX_IMAGE_SLOTS } = useUserPages(); 
 
     const [isUploading, setIsUploading] = useState(false);
@@ -28,11 +29,16 @@ export const AuthAndUpload = () => {
     
     const fileInputRef = useRef(null);
 
+    // 3. REFACTOR useEffect logic to use Auth0 variables
     useEffect(() => {
-        if (authLoaded && isSignedIn && userId) {
-            fetchUserPages(userId); 
-        } else if (authLoaded && !isSignedIn) {
-            fetchUserPages();
+        // isLoading is true initially, so we check !isLoading for readiness
+        if (authLoaded) {
+            if (isSignedIn && userId) {
+                fetchUserPages(userId); 
+            } else if (!isSignedIn) {
+                // Fetch public pages if not signed in
+                fetchUserPages(); 
+            }
         }
     }, [authLoaded, isSignedIn, userId, fetchUserPages]); 
 
@@ -55,13 +61,17 @@ export const AuthAndUpload = () => {
 
         setIsUploading(true);
         try {
-            const token = await getToken({ template: "long-lasting" }); 
+            // 4. REPLACE getToken() with getAccessTokenSilently()
+            // Auth0 handles token template/duration automatically via its configuration
+            const token = await getAccessTokenSilently(); 
+            
             const formData = new FormData();
             formData.append('image', file); 
 
             const response = await fetch(API_UPLOAD_URL, {
                 method: 'POST',
                 headers: {
+                    // Note: FormData request automatically sets Content-Type, so we only need Authorization
                     'Authorization': `Bearer ${token}`, 
                 },
                 body: formData,
@@ -74,11 +84,8 @@ export const AuthAndUpload = () => {
             
             console.log("Upload successful!");
 
-            if (userId) {
-                await fetchUserPages(userId); 
-            } else {
-                await fetchUserPages();
-            }
+            // Re-fetch pages, using userId if authenticated
+            await fetchUserPages(userId || undefined); 
 
         } catch (error) {
             console.error("Upload error:", error);
@@ -110,71 +117,52 @@ export const AuthAndUpload = () => {
             )}
             
             <div className="fixed top-4 right-4 sm:top-7 sm:right-10 z-[100]">
-                <SignedOut>
-                <SignInButton 
-                    mode="modal"
-                    appearance={{
-                        baseTheme: dark,
-                        variables: {
-                            colorPrimary: "#5a47ce", 
-                            colorText: "white", 
-                            colorBackground: "#232323", 
-                            colorInputBackground: "#1a1a1a", 
-                        },
-                        elements: {
-                            socialButtonsText: {
-                            color: '#ffffff',
-                            },
-                        }
-                    }}
-                >
-                <button className="auth-btn-base">
-                    Sign Up / Log In
-                </button>
-                </SignInButton>
-                </SignedOut>
-
-                <SignedIn>
-                <div className="flex items-center gap-[10px] flex-wrap justify-end">
-
-                    <label 
-                        htmlFor="file-upload" 
-                        onClick={handleUploadButtonClick}
-                        className={`auth-btn-base ${uploadDisabled ? ' text-white' : ''}`}
+                {/* 5. REPLACE <SignedOut> with standard ternary/conditional rendering */}
+                {!isSignedIn ? (
+                    // 6. REPLACE <SignInButton> with a standard button calling loginWithRedirect
+                    <button 
+                        className="auth-btn-base"
+                        onClick={() => loginWithRedirect()}
                     >
-                        {isUploading ? 'Uploading...' : 'Upload Image'}
-                    </label>
+                        Sign Up / Log In
+                    </button>
+                ) : (
+                    // 7. REPLACE <SignedIn> with a standard div
+                    <div className="flex items-center gap-[10px] flex-wrap justify-end">
 
-                    <input 
-                        id="file-upload" 
-                        type="file" 
-                        accept="image/*" 
-                        onChange={handleFileUpload} 
-                        style={{ display: 'none' }}           
-                        disabled={uploadDisabled}            
-                        ref={fileInputRef}
-                        />
+                        <label 
+                            htmlFor="file-upload" 
+                            onClick={handleUploadButtonClick}
+                            // Note: Clerk styles removed, ensure 'auth-btn-base' is defined in CSS
+                            className={`auth-btn-base ${uploadDisabled ? ' text-white' : ''}`}
+                        >
+                            {isUploading ? 'Uploading...' : 'Upload Image'}
+                        </label>
 
-                    <div className="user-avatar-container">
-                        <UserButton afterSignOutUrl="/" 
-                            appearance={{
-                                elements: {
-                                    userButtonAvatarBox: {
-                                        width: '40px', 
-                                        height: '40px',
-                                        border: 'none',
-                                    },
-                                    userButtonOuterIdentifier: {
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                    }
-                                }
-                            }}
-                        /> 
+                        <input 
+                            id="file-upload" 
+                            type="file" 
+                            accept="image/*" 
+                            onChange={handleFileUpload} 
+                            style={{ display: 'none' }}        
+                            disabled={uploadDisabled}            
+                            ref={fileInputRef}
+                            />
+
+                        <div className="user-avatar-container">
+                            {/* 8. REPLACE <UserButton> with a standard button calling logout() */}
+                            <button
+                                onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
+                                className="auth-btn-base"
+                                style={{ padding: '8px 12px' }} // Custom styling for a logout button
+                            >
+                                Log Out
+                            </button>
+                            
+                            {/* You could optionally display the user's avatar here using {user.picture} */}
+                        </div>
                     </div>
-                </div>
-                </SignedIn>
+                )}
             </div>
         </>
     );

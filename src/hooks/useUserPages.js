@@ -1,6 +1,7 @@
 import { useAtom } from "jotai";
 import { dynamicPagesAtom, defaultPages } from "../stores/pageStore";
-import { useAuth } from "@clerk/clerk-react";
+// 1. UPDATE IMPORT: Replace useAuth with useAuth0
+import { useAuth0 } from "@auth0/auth0-react"; 
 import { useCallback, useState, useMemo } from "react"; 
 
 const API_ROOT_URL = "https://photo-gallery-api-l2fz.onrender.com"; 
@@ -17,36 +18,60 @@ const BACK_COVER_PATH = "/textures/book-back.jpg";
  */
 
 export const useUserPages = () => {
-    const { isLoaded, userId, getToken } = useAuth(); 
+    // 2. UPDATE HOOK: Replace useAuth() with useAuth0()
+    const { 
+        isLoading, 
+        isAuthenticated,
+        user,
+        getAccessTokenSilently // Replaces getToken
+    } = useAuth0(); 
+    
+    // Map Auth0 properties to original logic variables
+    const isLoaded = !isLoading;
+    // Auth0 uses user.sub as the unique user ID (Clerk's userId)
+    const userId = user ? user.sub : null; 
+    
     const [pages, setPages] = useAtom(dynamicPagesAtom);
 
     const [userImageUrls, setUserImageUrls] = useState([]);
 
-    const fetchUserPages = useCallback(async (mockUserId) => { 
+    // We don't need 'mockUserId' anymore since 'userId' is available from useAuth0
+    const fetchUserPages = useCallback(async (explicitUserId) => { 
         
-        const effectiveUserId = mockUserId || userId;
+        const effectiveUserId = explicitUserId || userId; // Keep for fetching public vs user pages
         
-        if (!isLoaded || !effectiveUserId) { 
+        // 3. UPDATE CONDITION: Check Auth0's isAuthenticated property 
+        if (!isLoaded || (!isAuthenticated && !explicitUserId)) { 
+             // If not loaded OR (not signed in AND not explicitly fetching public pages)
             setPages(defaultPages);
-
             setUserImageUrls([]);
             return;
         }
+        
+        // Only attempt to get token if we have a user and are trying to access user pages
+        const isProtectedFetch = effectiveUserId && isAuthenticated;
+        let token = null;
 
         try {
-            const token = await getToken({ template: "long-lasting" }); 
+            if (isProtectedFetch) {
+                // 4. UPDATE TOKEN RETRIEVAL: Use getAccessTokenSilently()
+                // The 'template' property is not needed for Auth0's standard flow
+                token = await getAccessTokenSilently(); 
+            }
             
-            // The fetch request now uses the environment variable 
-            const response = await fetch(`${API_BASE_URL}/me`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
+            // Determine the API endpoint: /me (protected) or /public 
+            // NOTE: Assuming /public route is available for non-authenticated users
+            // If fetching public pages (no token needed), fetch should go to a public route
+            const apiEndpoint = isProtectedFetch ? `${API_BASE_URL}/me` : `${API_BASE_URL}/public`;
+            
+            const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+
+            const response = await fetch(apiEndpoint, {
+                headers: headers,
             });
 
             if (!response.ok) {
-                // If the fetch fails and API_ROOT_URL was undefined, 
-                // the error will be caught here.
-                throw new Error("Failed to fetch user images.");
+                throw new Error("Failed to fetch images.");
             }
 
             const rawUserImages = await response.json(); 
@@ -54,6 +79,7 @@ export const useUserPages = () => {
 
             setUserImageUrls(userImageUrls);
 
+            // ... (rest of the page construction logic is unchanged)
             const limitedUrls = userImageUrls.slice(0, MAX_IMAGE_SLOTS);
             
             while (limitedUrls.length < MAX_IMAGE_SLOTS) {
@@ -90,7 +116,7 @@ export const useUserPages = () => {
             setPages(defaultPages); 
             setUserImageUrls([]); 
         }
-    }, [isLoaded, getToken, setPages, userId]); 
+    }, [isLoaded, isAuthenticated, getAccessTokenSilently, setPages, userId]); 
 
     const currentImageCount = useMemo(() => userImageUrls.length, [userImageUrls]);
     

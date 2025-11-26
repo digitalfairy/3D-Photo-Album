@@ -59,6 +59,7 @@ export const useUserPages = () => {
                 token = await getAccessTokenSilently({
                     authorizationParams: {
                         audience: "https://photogalleryapi.com", // Must match your Auth0 API Identifier
+                        scope: 'openid profile email read:photos',
                     },
                 }); 
             }

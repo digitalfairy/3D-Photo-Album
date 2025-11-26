@@ -33,7 +33,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                 redirect_uri: callbackUrl,
                 audience: auth0Audience, 
                 // *** FIX: ADD SCOPE HERE ***
-                scope: 'openid profile email', // Standard scopes for user info
+                scope: 'openid profile email read:photos', // Standard scopes for user info
                 // --------------------------
             }}
         >

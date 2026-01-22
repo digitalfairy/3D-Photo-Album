@@ -16,6 +16,8 @@ const imageRoutes = (checkJwt) => {
     
     // --- POST /upload Route ---
     // Requires a valid JWT (checkJwt) AND the 'write:photos' scope
+
+    // TEST
     router.post('/upload', 
         checkJwt, 
         checkScopes(['write:photos']), // <-- APPLY WRITE SCOPE CHECK

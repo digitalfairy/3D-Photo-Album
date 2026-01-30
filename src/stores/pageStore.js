@@ -49,3 +49,4 @@ export const defaultPages = constructDefaultBook(DSC_PATHS);
 
 export const dynamicPagesAtom = atom(defaultPages); 
 export const pageAtom = atom(0);
+export const uiVisibleAtom = atom(true);

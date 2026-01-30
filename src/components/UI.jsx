@@ -1,11 +1,12 @@
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import { useEffect } from "react";
-import { pageAtom, dynamicPagesAtom } from "../stores/pageStore"; 
+import { pageAtom, dynamicPagesAtom, uiVisibleAtom } from "../stores/pageStore"; 
 import { AuthAndUpload } from "./AuthAndUpload"; 
 
 export const UI = ({ setIsUploading, isUploading }) => {
   const [page, setPage] = useAtom(pageAtom);
-  const [dynamicPages] = useAtom(dynamicPagesAtom); 
+  const dynamicPages = useAtomValue(dynamicPagesAtom); 
+  const uiVisible = useAtomValue(uiVisibleAtom);
 
   const backCoverIndex = dynamicPages.length > 0 ? dynamicPages.length - 1 : 0; 
   const backCoverClosedIndex = dynamicPages.length; 
@@ -19,7 +20,6 @@ export const UI = ({ setIsUploading, isUploading }) => {
 
   return (
     <>
-      {/* Top right Auth & Upload buttons */}
       <div className="ui-container">
         <AuthAndUpload 
           setIsUploading={setIsUploading} 
@@ -27,46 +27,38 @@ export const UI = ({ setIsUploading, isUploading }) => {
         />
       </div>
 
-      <main className="pointer-events-none select-none z-10 fixed inset-0 flex justify-between flex-col">
-        {/* Spacer for top margin */}
+      <main 
+        className={`fixed inset-0 z-50 flex flex-col justify-between select-none pointer-events-none transition-opacity duration-500 ${
+          uiVisible ? "opacity-100" : "opacity-0"
+        }`}
+      >
         <div className="h-20"></div> 
 
-        {/* --- MOBILE NAVIGATION (Small Screens) --- */}
-        <div className="w-full pointer-events-auto flex flex-col items-center p-4 md:hidden mb-6">
-          <div className="flex w-full max-w-sm gap-3 bg-black/40 p-3 rounded-2xl backdrop-blur-md border border-white/10 shadow-xl">
-            
-            {/* Left Fixed Column */}
+        {/* --- MOBILE NAVIGATION --- */}
+        <div className="w-full flex flex-col items-center p-4 md:hidden mb-6">
+          <div className="flex w-full max-w-sm gap-3 bg-black/40 p-3 rounded-2xl backdrop-blur-md border border-white/10 shadow-xl pointer-events-auto">
             <div className="flex flex-col gap-2 shrink-0 border-r border-white/10 pr-3">
               <button
-                className={`transition-all duration-300 px-3 py-2 rounded-lg text-xs font-bold uppercase border ${
-                  0 === page ? "bg-white text-black border-white" : "bg-black/40 text-white border-transparent"
-                }`}
+                className={`transition-all duration-300 px-3 py-2 rounded-lg text-xs font-bold uppercase border ${0 === page ? "bg-white text-black border-white" : "bg-black/40 text-white border-transparent"}`}
                 onClick={() => setPage(0)}
               >
                 Cover
               </button>
               <button
-                className={`transition-all duration-300 px-3 py-2 rounded-lg text-xs font-bold uppercase border ${
-                  page === backCoverIndex || page === backCoverClosedIndex 
-                  ? "bg-white text-black border-white"
-                  : "bg-black/40 text-white border-transparent"
-                }`}
+                className={`transition-all duration-300 px-3 py-2 rounded-lg text-xs font-bold uppercase border ${page === backCoverIndex || page === backCoverClosedIndex ? "bg-white text-black border-white" : "bg-black/40 text-white border-transparent"}`}
                 onClick={() => setPage(backCoverClosedIndex)} 
               >
                 Back
               </button>
             </div>
 
-            {/* Right Page Numbers - Grid for Mobile */}
-            <div className="grid grid-cols-4 gap-2 w-fit overflow-y-auto max-h-40 scrollbar-hide">
+            <div className="grid grid-cols-4 gap-2 w-fit">
               {dynamicPages.map((_, index) => {
                 if (index === 0 || index >= backCoverIndex) return null;
                 return (
                   <button
                     key={index}
-                    className={`transition-all duration-300 px-3 py-2 rounded-lg text-xs font-bold border flex items-center justify-center ${
-                      index === page ? "bg-white text-black border-white" : "bg-black/40 text-white border-white/10"
-                    }`}
+                    className={`transition-all duration-300 px-3 py-2 rounded-lg text-xs font-bold border flex items-center justify-center ${index === page ? "bg-white text-black border-white" : "bg-black/40 text-white border-white/10"}`}
                     style={{ minWidth: '45px' }}
                     onClick={() => setPage(index)}
                   >
@@ -78,42 +70,31 @@ export const UI = ({ setIsUploading, isUploading }) => {
           </div>
         </div>
 
-        {/* --- DESKTOP NAVIGATION (Wide Screens) --- */}
-        <div className="w-full pointer-events-auto hidden md:flex justify-center p-10">
-          <div className="flex items-start gap-4 bg-black/40 p-4 rounded-3xl backdrop-blur-md border border-white/10 shadow-2xl">
-            
-            {/* Left Fixed Column (Desktop) */}
+        {/* --- DESKTOP NAVIGATION --- */}
+        <div className="w-full hidden md:flex justify-center p-10">
+          <div className="flex items-start gap-4 bg-black/40 p-4 rounded-3xl backdrop-blur-md border border-white/10 shadow-2xl pointer-events-auto">
             <div className="flex flex-col gap-2 shrink-0 border-r border-white/10 pr-4">
               <button
-                className={`transition-all duration-300 px-6 py-3 rounded-xl text-sm font-bold uppercase border ${
-                  0 === page ? "bg-white text-black border-white" : "bg-black/40 text-white border-transparent hover:border-white/50"
-                }`}
+                className={`transition-all duration-300 px-6 py-3 rounded-xl text-sm font-bold uppercase border ${0 === page ? "bg-white text-black border-white" : "bg-black/40 text-white border-transparent hover:border-white/50"}`}
                 onClick={() => setPage(0)}
               >
                 Cover
               </button>
               <button
-                className={`transition-all duration-300 px-6 py-3 rounded-xl text-sm font-bold uppercase border ${
-                  page === backCoverIndex || page === backCoverClosedIndex 
-                  ? "bg-white text-black border-white"
-                  : "bg-black/40 text-white border-transparent hover:border-white/50"
-                }`}
+                className={`transition-all duration-300 px-6 py-3 rounded-xl text-sm font-bold uppercase border ${page === backCoverIndex || page === backCoverClosedIndex ? "bg-white text-black border-white" : "bg-black/40 text-white border-transparent hover:border-white/50"}`}
                 onClick={() => setPage(backCoverClosedIndex)} 
               >
                 Back Cover
               </button>
             </div>
 
-            {/* Right Page Numbers - Grid for Desktop (P1-P4 top, P5-P8 bottom) */}
             <div className="grid grid-cols-4 gap-3 w-fit">
               {dynamicPages.map((_, index) => {
                 if (index === 0 || index >= backCoverIndex) return null;
                 return (
                   <button
                     key={index}
-                    className={`transition-all duration-300 px-5 py-3 rounded-xl text-sm font-bold border flex items-center justify-center ${
-                      index === page ? "bg-white text-black border-white" : "bg-black/40 text-white border-white/10 hover:border-white/50"
-                    }`}
+                    className={`transition-all duration-300 px-5 py-3 rounded-xl text-sm font-bold border flex items-center justify-center ${index === page ? "bg-white text-black border-white" : "bg-black/40 text-white border-white/10 hover:border-white/50"}`}
                     style={{ minWidth: '60px' }}
                     onClick={() => setPage(index)}
                   >
@@ -127,7 +108,7 @@ export const UI = ({ setIsUploading, isUploading }) => {
       </main>
 
       {/* Background Scrolling Text */}
-      <div className="fixed inset-0 flex items-center -rotate-2 select-none w-full z-0 pointer-events-none opacity-20">
+      <div className="fixed inset-0 flex items-center -rotate-2 select-none w-full z-0 pointer-events-none opacity-10">
         <div className="w-full">
           <div className="animate-horizontal-scroll flex items-center gap-8 w-max px-8">
             <h1 className="shrink-0 text-white text-10xl font-black">Memories</h1>

@@ -50,7 +50,6 @@ export const AuthAndUpload = ({ setIsUploading, isUploading }) => {
             return; 
         }
 
-        // Trigger the Global Loader
         setIsUploading(true);
 
         try {
@@ -77,9 +76,8 @@ export const AuthAndUpload = ({ setIsUploading, isUploading }) => {
             console.error("Upload error:", error);
             alert(`Error uploading file: ${error.message}`);
         } finally {
-            // Hide the Global Loader
             setIsUploading(false);
-            event.target.value = null; 
+            if (event.target) event.target.value = null; 
         }
     };
         
@@ -92,9 +90,12 @@ export const AuthAndUpload = ({ setIsUploading, isUploading }) => {
     };
 
     const uploadDisabled = isUploading || currentImageCount >= MAX_IMAGE_SLOTS;
+    
+    if (isLoading) return null;
 
     return (
         <>
+            {/* Image Limit Popup */}
             {showLimitPopup && (
                 <div className="fixed inset-0 z-[110] flex items-center justify-center pointer-events-none">
                     <div className="bg-white/90 text-black/80 p-6 rounded-lg shadow-2xl text-lg font-bold text-center">
@@ -103,6 +104,7 @@ export const AuthAndUpload = ({ setIsUploading, isUploading }) => {
                 </div>
             )}
             
+            {/* UI Controls Container */}
             <div className="fixed top-4 right-4 sm:top-7 sm:right-10 z-[100]">
                 {!isSignedIn ? (
                     <button 
@@ -113,6 +115,7 @@ export const AuthAndUpload = ({ setIsUploading, isUploading }) => {
                     </button>
                 ) : (
                     <div className="flex items-center gap-[10px] flex-wrap justify-end">
+                        {/* Custom Upload Button Label */}
                         <label 
                             htmlFor="file-upload" 
                             onClick={handleUploadButtonClick}
@@ -121,6 +124,7 @@ export const AuthAndUpload = ({ setIsUploading, isUploading }) => {
                             {isUploading ? 'Uploading...' : 'Upload Image'}
                         </label>
 
+                        {/* Hidden File Input */}
                         <input 
                             id="file-upload" 
                             type="file" 
@@ -131,6 +135,7 @@ export const AuthAndUpload = ({ setIsUploading, isUploading }) => {
                             ref={fileInputRef}
                         />
 
+                        {/* Logout Button */}
                         <div className="user-avatar-container">
                             <button
                                 onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}

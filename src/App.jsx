@@ -1,17 +1,31 @@
 import { Canvas } from "@react-three/fiber";
-import { Suspense, useState } from "react"; // Added useState here
+import { Suspense, useState, useEffect, useRef } from "react";
+import { useAuth0 } from "@auth0/auth0-react"; 
 import { Experience } from "./components/Experience";
 import { UI } from "./components/UI";
-import { CustomLoader } from "./components/CustomLoader"; // Added CustomLoader import
+import { CustomLoader } from "./components/CustomLoader";
 
 function App() {
+  const { isLoading: authLoading } = useAuth0();
   const [isUploading, setIsUploading] = useState(false);
+  
+  // Track if we have finished the initial load at least once
+  const hasFinishedFirstLoad = useRef(false);
+
+  useEffect(() => {
+    if (!authLoading) {
+      hasFinishedFirstLoad.current = true;
+    }
+  }, [authLoading]);
+
+  // Logic: Only show "Initializing" if it's the FIRST time loading.
+  // After that, only show the loader for manual uploads.
+  const shouldShowLoader = isUploading || (authLoading && !hasFinishedFirstLoad.current);
 
   return (
     <>
-      <CustomLoader isUploading={isUploading} />
+      <CustomLoader isUploading={shouldShowLoader} />
       
-      {/* Pass BOTH the state and the setter to UI */}
       <UI setIsUploading={setIsUploading} isUploading={isUploading} />
       
       <Canvas shadows camera={{

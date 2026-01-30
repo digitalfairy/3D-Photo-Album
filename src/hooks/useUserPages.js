@@ -46,11 +46,9 @@ export const useUserPages = () => {
 
         try {
             if (isProtectedFetch) {
-                // *** FIX APPLIED HERE: Added 'write:photos' to the scope string. ***
                 token = await getAccessTokenSilently({
                     authorizationParams: {
                         audience: "https://photogalleryapi.com",
-                        // The token must request ALL required scopes for both read and write operations.
                         scope: 'openid profile email read:photos write:photos', 
                     },
                 }); 
@@ -65,7 +63,6 @@ export const useUserPages = () => {
             });
 
             if (!response.ok) {
-                // If the backend returns a 403 Forbidden, this error will be thrown.
                 throw new Error("Failed to fetch images.");
             }
 
@@ -74,7 +71,6 @@ export const useUserPages = () => {
 
             setUserImageUrls(userImageUrls);
 
-            // ... (rest of the page construction logic is unchanged)
             const limitedUrls = userImageUrls.slice(0, MAX_IMAGE_SLOTS);
             
             while (limitedUrls.length < MAX_IMAGE_SLOTS) {

@@ -9,15 +9,12 @@ export function CustomLoader({ isUploading = false }: CustomLoaderProps) {
   const { progress, active } = useProgress();
   const [shown, setShown] = useState(true);
 
-  // Determine if the logic thinks we are "busy"
   const isBusy = active || isUploading;
 
   useEffect(() => {
     if (isBusy) {
       setShown(true);
     } else {
-      // Once loading is finished, wait 1 second so the user can see 
-      // the "READY" state before the fade-out begins.
       const timer = setTimeout(() => {
         setShown(false);
       }, 1000);
@@ -43,7 +40,6 @@ export function CustomLoader({ isUploading = false }: CustomLoaderProps) {
           <div
             style={{
               ...styles.progressBar,
-              // If uploading, we show a near-full bar to indicate activity
               width: isUploading ? "95%" : active ? `${progress}%` : "100%",
               transition: isUploading
                 ? "width 10s cubic-bezier(0.1, 0, 0, 1)"
@@ -80,7 +76,6 @@ const styles: { [key: string]: React.CSSProperties } = {
     justifyContent: "center",
     background: "#050505",
     zIndex: 9999,
-    // Smooth transition for the fade effect
     transition: "opacity 1s ease-in-out, visibility 1s",
   },
   container: {

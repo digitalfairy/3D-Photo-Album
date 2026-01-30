@@ -1,39 +1,45 @@
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Suspense } from "react";
+import { Suspense, useState, useEffect, useRef } from "react";
+import { useAuth0 } from "@auth0/auth0-react"; 
 import { OrbitControls } from "@react-three/drei";
 import { useSetAtom } from "jotai";
 import { uiVisibleAtom } from "./stores/pageStore";
 import { Experience } from "./components/Experience";
 import { UI } from "./components/UI";
+import { CustomLoader } from "./components/CustomLoader";
 
 function CameraHandler() {
   const setUiVisible = useSetAtom(uiVisibleAtom);
-  
   useFrame((state) => {
-    // Calculate distance from center [0,0,0]
     const distance = state.camera.position.length();
-    
-    // Threshold: Hide UI if closer than 4.5 units
-    // You can adjust 4.5 to 3.5 if you want it to stay visible longer
-    if (distance < 3.4) {
-      setUiVisible(false);
-    } else {
-      setUiVisible(true);
-    }
+    setUiVisible(distance >= 4.5);
   });
   return null;
 }
 
 function App() {
-  const isDesktop = window.innerWidth > 800;
+  const { isLoading: authLoading } = useAuth0();
+  const [isUploading, setIsUploading] = useState(false);
+  const hasFinishedFirstLoad = useRef(false);
+
+  useEffect(() => {
+    if (!authLoading) {
+      hasFinishedFirstLoad.current = true;
+    }
+  }, [authLoading]);
+
+  const showInitialLoader = authLoading && !hasFinishedFirstLoad.current;
 
   return (
     <>
-      <UI />
-      <Canvas 
-        shadows 
-        camera={{ position: [-0.5, 1, isDesktop ? 6 : 12], fov: 45 }}
-      >
+      <CustomLoader isUploading={isUploading || showInitialLoader} />
+      
+      <UI setIsUploading={setIsUploading} isUploading={isUploading} />
+      
+      <Canvas shadows camera={{
+          position: [-0.5, 1, window.innerWidth > 800 ? 6 : 12],
+          fov: 45,
+      }}>
         <CameraHandler />
         <group position-y={0}>
           <Suspense fallback={null}>

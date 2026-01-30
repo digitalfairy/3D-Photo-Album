@@ -29,7 +29,7 @@ function App() {
       <UI setIsUploading={setIsUploading} isUploading={isUploading} />
       
       <Canvas shadows camera={{
-          position: [-0.5, 1, window.innerWidth > 800 ? 4 : 9],
+          position: [-0.5, 1, window.innerWidth > 800 ? 4 : 12],
           fov: 45,
       }}>
         <group position-y={0}>

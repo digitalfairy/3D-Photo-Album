@@ -57,16 +57,17 @@ export const UI = ({ setIsUploading, isUploading }) => {
               </button>
             </div>
 
-            {/* Right Scrollable/Wrapped Pages */}
-            <div className="flex flex-wrap gap-2 overflow-y-auto max-h-32 scrollbar-hide">
+            {/* Right Page Numbers - Grid for Mobile */}
+            <div className="grid grid-cols-4 gap-2 w-fit overflow-y-auto max-h-40 scrollbar-hide">
               {dynamicPages.map((_, index) => {
                 if (index === 0 || index >= backCoverIndex) return null;
                 return (
                   <button
                     key={index}
-                    className={`transition-all duration-300 px-3 py-2 rounded-lg text-xs font-bold border ${
+                    className={`transition-all duration-300 px-3 py-2 rounded-lg text-xs font-bold border flex items-center justify-center ${
                       index === page ? "bg-white text-black border-white" : "bg-black/40 text-white border-white/10"
                     }`}
+                    style={{ minWidth: '45px' }}
                     onClick={() => setPage(index)}
                   >
                     P{index}
@@ -103,16 +104,17 @@ export const UI = ({ setIsUploading, isUploading }) => {
               </button>
             </div>
 
-            {/* Right Wrapped Pages (Desktop) */}
-            <div className="flex flex-wrap items-center gap-3 max-w-4xl">
+            {/* Right Page Numbers - Grid for Desktop (P1-P4 top, P5-P8 bottom) */}
+            <div className="grid grid-cols-4 gap-3 w-fit">
               {dynamicPages.map((_, index) => {
                 if (index === 0 || index >= backCoverIndex) return null;
                 return (
                   <button
                     key={index}
-                    className={`transition-all duration-300 px-5 py-3 rounded-xl text-sm font-bold border ${
+                    className={`transition-all duration-300 px-5 py-3 rounded-xl text-sm font-bold border flex items-center justify-center ${
                       index === page ? "bg-white text-black border-white" : "bg-black/40 text-white border-white/10 hover:border-white/50"
                     }`}
+                    style={{ minWidth: '60px' }}
                     onClick={() => setPage(index)}
                   >
                     P{index}

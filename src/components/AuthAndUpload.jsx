@@ -140,7 +140,7 @@ export const AuthAndUpload = ({ setIsUploading, isUploading }) => {
                             <button
                                 onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
                                 className="auth-btn-base"
-                                style={{ padding: '8px 12px' }}
+                                style={{ padding: '8px 12px', backgroundColor: '#00000066' }}
                             >
                                 Log Out
                             </button>

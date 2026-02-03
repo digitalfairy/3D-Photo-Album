@@ -1,5 +1,3 @@
-// index.js (No changes needed, already correct)
-
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';

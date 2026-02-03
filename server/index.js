@@ -14,7 +14,7 @@ const port = process.env.PORT || 3001;
 const mongoUri = process.env.MONGODB_URI;
 
 const allowedOrigins = [
-    'https://app.anitacreativestudio.com',           
+    'https://album.anitacreativestudio.com',           
     'https://photo-gallery-frontend-steel.vercel.app', 
     'http://localhost:5173'
 ];
